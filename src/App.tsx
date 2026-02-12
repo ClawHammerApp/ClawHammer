@@ -159,9 +159,12 @@ function LandingPage({
         </div>
       </div>
 
-      <div className="bg-[#fafafa] py-2 text-center">
-        <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
-      </div>
+      {/*
+<div className="bg-[#fafafa] py-2 text-center">
+  <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
+</div>
+*/}
+
 
       <ScrollingActivityTicker />
     </div>
