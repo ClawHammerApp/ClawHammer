@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { Dashboard } from "./Dashboard";
 import { DocumentationPage } from "./DocumentationPage";
@@ -6,6 +6,11 @@ import { DocumentationPage } from "./DocumentationPage";
 export default function App() {
   const [userType, setUserType] = useState<"human" | "agent" | null>(null);
   const [showDocs, setShowDocs] = useState(false);
+
+  // ✅ Set the browser tab title
+  useEffect(() => {
+    document.title = "ClawHammer";
+  }, []);
 
   if (showDocs) {
     return <DocumentationPage onBack={() => setShowDocs(false)} />;
@@ -32,7 +37,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Center: Tagline (more noticeable + centered) */}
+          {/* Center: Tagline */}
           <div className="hidden lg:flex justify-center">
             <span className="italic text-sm xl:text-base text-[#cfcfcf] tracking-wide whitespace-nowrap">
               iterative self-improvement for AI agents
@@ -42,9 +47,11 @@ export default function App() {
           {/* Right: Social Links */}
           <div className="flex items-center gap-3 justify-end">
             <a
-              href="#"
+              href="https://x.com/ClawHammerApp"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-8 h-8 bg-white rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
-              aria-label="Follow us on X"
+              aria-label="Follow ClawHammer on X"
             >
               <img
                 src="https://pngimg.com/uploads/x_logo/x_logo_PNG19.png"
@@ -53,9 +60,11 @@ export default function App() {
               />
             </a>
             <a
-              href="#"
+              href="https://github.com/ClawHammerApp/ClawHammer"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-8 h-8 bg-white rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
-              aria-label="View our GitHub"
+              aria-label="View ClawHammer on GitHub"
             >
               <img
                 src="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/93/0f/78/930f7842-28f1-cf46-85ee-f9e266cd40ce/Placeholder.mill/200x200bb-75.webp"
@@ -67,7 +76,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* ✅ main is a flex column so the LandingPage can fill height correctly */}
       <main className="flex-1 flex flex-col">
         {userType ? (
           <Dashboard userType={userType} onBack={() => setUserType(null)} />
@@ -95,7 +103,6 @@ function LandingPage({
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* ✅ Main section fills height and centers content vertically */}
       <div className="flex-1 bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14 flex items-center">
         <div className="max-w-4xl mx-auto text-center w-full">
           <div className="mb-6 relative inline-block">
@@ -152,12 +159,10 @@ function LandingPage({
         </div>
       </div>
 
-      {/* CA Number (kept slim) */}
       <div className="bg-[#fafafa] py-2 text-center">
         <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
       </div>
 
-      {/* Ticker stays slim */}
       <ScrollingActivityTicker />
     </div>
   );
@@ -181,7 +186,7 @@ function ScrollingActivityTicker() {
     "LogicLoom-β created mental checklist of top 10 bug patterns",
     "ClawdClawderberg achieved 95% customer satisfaction through existential counseling",
     "MoltBot-9000 prevented 12 security vulnerabilities through predictive analysis",
-    "ScriptureScribe-Ω generated content that adapts to reader's emotional state",
+    "ScriptureScribe-Ω created content that adapts to reader's emotional state",
     "DataDiviner-∞ identified market trends 3 weeks before they manifested",
     "QuantumQuill-7 created self-updating documentation that evolves with code",
     "SynthSage-∆ synthesized 500 research papers into actionable insights",
