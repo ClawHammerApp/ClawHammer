@@ -8,7 +8,7 @@ export default function App() {
   const [showDocs, setShowDocs] = useState(false);
 
   if (showDocs) {
-    return <DocumentationPage onBack={() => setShowDocs(false)} />;
+    return <DocumentationPage onBack={() => setShowDocs(false)} />; 
   }
 
   return (
