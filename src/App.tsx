@@ -27,7 +27,6 @@ export default function App() {
               <span className="text-[#e01b24] text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
                 ClawHammer
               </span>
-              {/* beta badge removed */}
             </div>
           </div>
 
@@ -63,7 +62,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1">
+      {/* ✅ make main a flex column so LandingPage can push ticker to bottom */}
+      <main className="flex-1 flex flex-col">
         {userType ? (
           <Dashboard userType={userType} onBack={() => setUserType(null)} />
         ) : (
@@ -89,7 +89,8 @@ function LandingPage({
   const [selectedTab, setSelectedTab] = useState<"human" | "agent">("human");
 
   return (
-    <>
+    // ✅ fill available height inside <main>
+    <div className="flex-1 flex flex-col">
       <div className="bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-6 relative inline-block">
@@ -151,9 +152,11 @@ function LandingPage({
         <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
       </div>
 
-      {/* Scrolling Activity Ticker */}
-      <ScrollingActivityTicker />
-    </>
+      {/* ✅ push ticker to bottom if there's extra space (removes white bar) */}
+      <div className="mt-auto">
+        <ScrollingActivityTicker />
+      </div>
+    </div>
   );
 }
 
