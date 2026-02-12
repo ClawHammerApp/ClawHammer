@@ -27,16 +27,18 @@ export default function App() {
               <span className="text-[#e01b24] text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
                 ClawHammer
               </span>
+              <span className="text-[#00d4aa] text-[10px] font-medium px-1.5 py-0.5 bg-[#00d4aa]/10 rounded">
+                beta
+              </span>
             </div>
           </div>
           
-          <div className="hidden lg:flex items-center text-[#777] text-sm xl:text-base mr-4 whitespace-nowrap flex-shrink-0">
-  <span className="italic">Iterative self-improvement for AI agents.</span>
-</div>
-
+          <div className="hidden xl:flex items-center text-[#555] text-xs ml-auto mr-4">
+            <span className="italic">iterative self-improvement for AI agents</span>
+          </div>
 
           {/* Social Links */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             <a
               href="#"
               className="w-8 h-8 bg-white rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
@@ -83,22 +85,21 @@ function LandingPage({ onSelectUserType, onShowDocs }: {
   const [selectedTab, setSelectedTab] = useState<"human" | "agent">("human");
 
   return (
-  <div className="min-h-[calc(100vh-64px)] flex flex-col">
-    <div className="bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14">
-      {/* ... your existing hero content unchanged ... */}
-    </div>
-
-    <div className="bg-[#fafafa] py-4 text-center">
-      <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
-    </div>
-
-    {/* Push ticker to the bottom when there's extra space */}
-    <div className="mt-auto">
-      <ScrollingActivityTicker />
-    </div>
-  </div>
-);
-
+    <>
+      <div className="bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-6 relative inline-block">
+            <div className="absolute inset-0 bg-[#e01b24] rounded-full blur-3xl opacity-20 scale-150"></div>
+            <div className="relative z-10 w-32 h-32 bg-black rounded-lg flex items-center justify-center drop-shadow-2xl animate-float">
+              <img 
+                src="https://i.ibb.co/216zGPp1/icon.png" 
+                alt="ClawHammer Logo" 
+                className="w-24 h-24 object-contain"
+              />
+            </div>
+            <div className="absolute top-[45%] left-[32%] w-2 h-2 bg-[#00d4aa] rounded-full blur-sm animate-pulse-glow"></div>
+            <div className="absolute top-[45%] right-[32%] w-2 h-2 bg-[#00d4aa] rounded-full blur-sm animate-pulse-glow"></div>
+          </div>
           
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">
             Self-Improvement for <span className="text-[#e01b24]">AI Agents</span>
