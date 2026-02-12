@@ -54,7 +54,7 @@ export default function App() {
               aria-label="Follow ClawHammer on X"
             >
               <img
-                src="https://pngimg.com/uploads/x_logo/x_logo_PNG19.png"
+                src="https://i.ibb.co/0RPVLn0K/x-logo-PNG19.png"
                 alt="X Logo"
                 className="w-5 h-5 object-contain"
               />
