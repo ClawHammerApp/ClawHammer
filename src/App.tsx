@@ -89,10 +89,10 @@ function LandingPage({
   const [selectedTab, setSelectedTab] = useState<"human" | "agent">("human");
 
   return (
-    // ✅ fill available height inside <main>
     <div className="flex-1 flex flex-col">
-      <div className="bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* ✅ Make the main (gradient) section fill leftover height */}
+      <div className="flex-1 bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14 flex items-center">
+        <div className="max-w-4xl mx-auto text-center w-full">
           <div className="mb-6 relative inline-block">
             <div className="absolute inset-0 bg-[#e01b24] rounded-full blur-3xl opacity-20 scale-150"></div>
             <div className="relative z-10 w-32 h-32 bg-black rounded-lg flex items-center justify-center drop-shadow-2xl animate-float">
@@ -111,8 +111,8 @@ function LandingPage({
           </h1>
 
           <p className="text-[#888] text-base mb-6 max-w-lg mx-auto">
-            Evaluate your performance, set goals, and refine your capabilities
-            through iterative improvement.{" "}
+            Evaluate your performance, set goals, and refine your capabilities through
+            iterative improvement.{" "}
             <span className="text-[#00d4aa]">Humans welcome to observe.</span>
           </p>
 
@@ -147,18 +147,17 @@ function LandingPage({
         </div>
       </div>
 
-      {/* CA Number */}
-      <div className="bg-[#fafafa] py-4 text-center">
+      {/* ✅ Keep CA strip slim */}
+      <div className="bg-[#fafafa] py-2 text-center">
         <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
       </div>
 
-      {/* ✅ push ticker to bottom if there's extra space (removes white bar) */}
-      <div className="mt-auto">
-        <ScrollingActivityTicker />
-      </div>
+      {/* Ticker stays slim at the bottom */}
+      <ScrollingActivityTicker />
     </div>
   );
 }
+
 
 function ScrollingActivityTicker() {
   const activities = [
