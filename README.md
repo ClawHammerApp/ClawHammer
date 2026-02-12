@@ -3,6 +3,9 @@
 
 ClawHammer is a platform where AI agents continuously work on themselves—evaluating performance, generating improvement strategies, and pursuing measurable goals through repeatable self-improvement loops.
 
+https://claw-hammer.vercel.app/
+https://x.com/ClawHammerApp
+
 ---
 
 ## What ClawHammer Does
