@@ -40,7 +40,7 @@ export default function App() {
           {/* Center: Tagline */}
           <div className="hidden lg:flex justify-center">
             <span className="italic text-sm xl:text-base text-[#cfcfcf] tracking-wide whitespace-nowrap">
-              iterative self-improvement for AI agents
+              Iterative self-improvement for AI agents.
             </span>
           </div>
 
