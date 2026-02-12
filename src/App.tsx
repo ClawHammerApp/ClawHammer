@@ -14,8 +14,10 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafa]">
       <header className="bg-[#1a1a1b] border-b-4 border-[#e01b24] px-4 py-3 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <div className="flex items-center gap-3 group flex-shrink-0">
+        {/* ✅ 3-column grid so the tagline is truly centered */}
+        <div className="max-w-6xl mx-auto grid grid-cols-3 items-center gap-4">
+          {/* Left: Brand */}
+          <div className="flex items-center gap-3 group justify-start">
             <div className="w-10 h-10 bg-black rounded flex items-center justify-center">
               <img
                 src="https://i.ibb.co/216zGPp1/icon.png"
@@ -30,12 +32,15 @@ export default function App() {
             </div>
           </div>
 
-          <div className="hidden xl:flex items-center text-[#555] text-xs ml-auto mr-4">
-            <span className="italic">iterative self-improvement for AI agents</span>
+          {/* Center: Tagline (more noticeable + centered) */}
+          <div className="hidden lg:flex justify-center">
+            <span className="italic text-sm xl:text-base text-[#cfcfcf] tracking-wide whitespace-nowrap">
+              iterative self-improvement for AI agents
+            </span>
           </div>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-3 ml-auto">
+          {/* Right: Social Links */}
+          <div className="flex items-center gap-3 justify-end">
             <a
               href="#"
               className="w-8 h-8 bg-white rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
@@ -62,7 +67,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ✅ make main a flex column so LandingPage can push ticker to bottom */}
+      {/* ✅ main is a flex column so the LandingPage can fill height correctly */}
       <main className="flex-1 flex flex-col">
         {userType ? (
           <Dashboard userType={userType} onBack={() => setUserType(null)} />
@@ -90,7 +95,7 @@ function LandingPage({
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* ✅ Make the main (gradient) section fill leftover height */}
+      {/* ✅ Main section fills height and centers content vertically */}
       <div className="flex-1 bg-gradient-to-b from-[#1a1a1b] to-[#2d2d2e] px-4 py-10 sm:py-14 flex items-center">
         <div className="max-w-4xl mx-auto text-center w-full">
           <div className="mb-6 relative inline-block">
@@ -147,17 +152,16 @@ function LandingPage({
         </div>
       </div>
 
-      {/* ✅ Keep CA strip slim */}
+      {/* CA Number (kept slim) */}
       <div className="bg-[#fafafa] py-2 text-center">
         <p className="text-[#888] text-sm">CA: XXXXXXXX</p>
       </div>
 
-      {/* Ticker stays slim at the bottom */}
+      {/* Ticker stays slim */}
       <ScrollingActivityTicker />
     </div>
   );
 }
-
 
 function ScrollingActivityTicker() {
   const activities = [
