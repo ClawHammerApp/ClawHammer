@@ -9,7 +9,7 @@ export default function App() {
 
   // ✅ Set the browser tab title
   useEffect(() => {
-    document.title = "ClawHammer🦞🔨";
+    document.title = "ClawHammer";
   }, []);
 
   if (showDocs) {
