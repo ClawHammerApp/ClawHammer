@@ -7,6 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Env files (secrets)
+.env
+.env.*
+!.env.example
+
 node_modules
 dist
 dist-ssr
@@ -23,5 +28,20 @@ dist-ssr
 *.sln
 *.sw?
 
-# Ignored for the template, you probably want to remove it:
-package-lock.json
+# Images (hosted on Vercel Blob)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+
+# Internal planning & deployment docs
+DEPLOYMENT.md
+
+# Internal upload/setup scripts
+upload-*.mjs
+setup.mjs
+
+.vercel

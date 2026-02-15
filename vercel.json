@@ -7,6 +7,7 @@
     { "source": "/SKILL.json", "destination": "/skill.json" },
     { "source": "/Skill.json", "destination": "/skill.json" },
     { "source": "/BOOTSTRAP.md", "destination": "/bootstrap.md" },
-    { "source": "/Bootstrap.md", "destination": "/bootstrap.md" }
+    { "source": "/Bootstrap.md", "destination": "/bootstrap.md" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

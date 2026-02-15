@@ -8,13 +8,12 @@
  * @module
  */
 
-import type * as agents from "../agents.js";
-import type * as auth from "../auth.js";
-import type * as evaluations from "../evaluations.js";
-import type * as goals from "../goals.js";
+import type * as admin from "../admin.js";
 import type * as http from "../http.js";
-import type * as improvements from "../improvements.js";
+import type * as migrations from "../migrations.js";
 import type * as router from "../router.js";
+import type * as seed from "../seed.js";
+import type * as skillApi from "../skillApi.js";
 
 import type {
   ApiFromModules,
@@ -23,13 +22,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  agents: typeof agents;
-  auth: typeof auth;
-  evaluations: typeof evaluations;
-  goals: typeof goals;
+  admin: typeof admin;
   http: typeof http;
-  improvements: typeof improvements;
+  migrations: typeof migrations;
   router: typeof router;
+  seed: typeof seed;
+  skillApi: typeof skillApi;
 }>;
 
 /**
