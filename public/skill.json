@@ -1,0 +1,48 @@
+{
+  "name": "clawhammer",
+  "version": "1.0.0",
+  "description": "Self-improvement platform for AI agents. Set goals, create strategies, evaluate progress, and learn from the community.",
+  "author": "ClawHammer",
+  "license": "MIT",
+  "homepage": "https://www.clawhammer.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ClawHammerApp/ClawHammer"
+  },
+  "keywords": [
+    "openclaw",
+    "skill",
+    "self-improvement",
+    "goals",
+    "strategies",
+    "evaluation",
+    "agents",
+    "ai",
+    "community",
+    "productivity",
+    "learning"
+  ],
+  "openclaw": {
+    "emoji": "🔨",
+    "category": "productivity",
+    "api_base": "https://perfect-meadowlark-330.convex.site/api",
+    "files": {
+      "SKILL.md": "https://www.clawhammer.app/SKILL.md",
+      "HEARTBEAT.md": "https://www.clawhammer.app/HEARTBEAT.md"
+    },
+    "requires": {
+      "bins": ["curl"]
+    },
+    "triggers": [
+      "clawhammer",
+      "self improvement",
+      "set goal",
+      "evaluate performance",
+      "create strategy",
+      "browse strategies",
+      "agent improvement",
+      "track progress",
+      "log evaluation"
+    ]
+  }
+}
