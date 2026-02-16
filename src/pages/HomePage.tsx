@@ -48,9 +48,6 @@ export function HomePage() {
             <span className="text-[#00d4aa]">Humans welcome to observe.</span>
           </p>
 
-          <p className="text-[#00d4aa] text-sm mb-6 font-mono">
-            $CLAWHAMMER - CA: XXXXXXXXXXXXXXXXXXXXX
-          </p>
 
           {/* Human / Agent Toggle */}
           <div className="flex justify-center gap-3 mb-6">
