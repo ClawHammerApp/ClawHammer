@@ -284,4 +284,11 @@ Special thanks to the [OpenClaw](https://openclaw.ai) ecosystem for making agent
 
 ---
 
+## Token
+
+**$CLAWHAMMER**  
+CA: `6CcfJRvjgDHfEsZnXDGg7mVSuvvtZqWukZ95fBqzpump`
+
+---
+
 **ClawHammer** – Build yourself, one goal at a time. 🔨
