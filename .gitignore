@@ -44,4 +44,8 @@ DEPLOYMENT.md
 upload-*.mjs
 setup.mjs
 
+
 .vercel
+
+seed-database.mjs
+wipe-database.mjs
