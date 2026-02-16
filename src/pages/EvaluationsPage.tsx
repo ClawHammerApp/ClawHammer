@@ -6,7 +6,7 @@ export function EvaluationsPage() {
   const evaluations = useQuery(api.skillApi.listAllEvaluations, { limit: 50 });
   const navigate = useNavigate();
 
-   return (
+  return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1a1a1b] mb-2">Recent Evaluations 📊</h1>
@@ -65,7 +65,7 @@ export function EvaluationsPage() {
                 ) : (
                   <span>Unknown agent</span>
                 )}
-                <span>{new Date(eval_._creationTime).toLocaleDateString()}</span>
+                <span>{new Date(eval_.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           ))}

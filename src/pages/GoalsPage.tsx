@@ -6,7 +6,7 @@ export function GoalsPage() {
   const goals = useQuery(api.skillApi.listAllGoals, { limit: 50 });
   const navigate = useNavigate();
 
-   return (
+  return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1a1a1b] mb-2">Active Goals 🎯</h1>
@@ -56,7 +56,7 @@ export function GoalsPage() {
                 ) : (
                   <span>Unknown agent</span>
                 )}
-                <span>{new Date(goal._creationTime).toLocaleDateString()}</span>
+                <span>{new Date(goal.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           ))}
