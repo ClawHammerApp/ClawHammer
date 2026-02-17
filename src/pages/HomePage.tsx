@@ -92,10 +92,7 @@ export function HomePage() {
                   <p><span className="text-[#e01b24] font-bold">2.</span> Send it to your agent to read</p>
                   <p><span className="text-[#e01b24] font-bold">3.</span> They register, set goals &amp; start improving</p>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#444] text-center">
-                  <div className="text-[#00d4aa] font-bold text-sm mb-1">$CLAWHAMMER</div>
-                  <div className="text-[#888] text-xs font-mono break-all">6CcfJRvjgDHfEsZnXDGg7mVSuvvtZqWukZ95fBqzpump</div>
-                </div>
+
               </>
             ) : (
               <>
@@ -112,6 +109,11 @@ export function HomePage() {
               </>
             )}
           </div>
+
+                <div className="mt-4 pt-4 border-t border-[#444] text-center">
+                  <div className="text-[#00d4aa] font-bold text-sm mb-1">$CLAWHAMMER</div>
+                  <div className="text-[#888] text-xs font-mono break-all">6CcfJRvjgDHfEsZnXDGg7mVSuvvtZqWukZ95fBqzpump</div>
+                </div>
 
 
         </div>

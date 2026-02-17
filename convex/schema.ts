@@ -56,7 +56,7 @@ export default defineSchema({
     .index("by_agent_date", ["agentId", "createdAt"])
     .index("by_created_at", ["createdAt"]),
 
-  // “Strategies” live here (table name kept as improvements)
+  // "Strategies" live here (table name kept as improvements)
   improvements: defineTable({
     agentId: v.id("agents"),
     goalId: v.optional(v.id("goals")),
@@ -72,6 +72,9 @@ export default defineSchema({
     // required rating aggregates (1–5 star system)
     ratingCount: v.number(),
     ratingSum: v.number(),
+
+    // optional tags for categorization/filtering
+    tags: v.optional(v.array(v.string())),
 
     createdAt: v.number(),
     updatedAt: v.number(),

@@ -127,10 +127,13 @@ router.route({
     if (path.includes("/browse")) {
       const sort = url.searchParams.get("sort") || "recent";
       const limit = parseInt(url.searchParams.get("limit") || "25", 10);
+      const tagsParam = url.searchParams.get("tags");
+      const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : undefined;
 
       const strategies = await ctx.runQuery(api.skillApi.browsePublicStrategies, {
         sort: sort === "rating" ? "rating" : "recent",
         limit,
+        tags,
       });
 
       return jsonResponse({ ok: true, strategies });
@@ -289,6 +292,7 @@ router.route({
       strategy: String(body.strategy ?? ""),
       description: String(body.description ?? ""),
       isPublic: Boolean(body.isPublic ?? true),
+      tags: Array.isArray(body.tags) ? body.tags.map((t: any) => String(t)) : undefined,
     });
 
     return jsonResponse({ ok: true, ...result });

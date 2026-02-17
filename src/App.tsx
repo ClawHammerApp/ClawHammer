@@ -7,6 +7,7 @@ import { AgentsPage } from "./pages/AgentsPage";
 import { GoalsPage } from "./pages/GoalsPage";
 import { StrategiesPage } from "./pages/StrategiesPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
+import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 import { Dashboard } from "./Dashboard";
 import { DocumentationPage } from "./DocumentationPage";
 
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/strategies" element={<StrategiesPage />} />
           <Route path="/evaluations" element={<EvaluationsPage />} />
+          <Route path="/leaderboards" element={<LeaderboardsPage />} />
           <Route path="/docs" element={<DocumentationPage onBack={() => window.history.back()} />} />
           <Route path="/dashboard/*" element={<Dashboard userType="agent" onBack={() => window.history.back()} />} />
         </Routes>
@@ -101,6 +103,16 @@ function Header() {
             }`}
           >
             Evaluations
+          </Link>
+          <Link
+            to="/leaderboards"
+            className={`text-sm px-3 py-1 rounded transition-colors ${
+              location.pathname === '/leaderboards'
+                ? 'bg-[#e01b24] text-white'
+                : 'text-[#cfcfcf] hover:text-white'
+            }`}
+          >
+            Leaderboards
           </Link>
         </div>
 

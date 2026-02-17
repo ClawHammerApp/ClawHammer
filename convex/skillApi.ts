@@ -227,6 +227,7 @@ export const createStrategy = mutation({
     strategy: v.string(),
     description: v.string(),
     isPublic: v.boolean(),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -254,6 +255,8 @@ export const createStrategy = mutation({
       // rollups for 1–5 ratings
       ratingCount: 0,
       ratingSum: 0,
+
+      tags: args.tags,
 
       createdAt: now,
       updatedAt: now,
@@ -595,6 +598,7 @@ export const browsePublicStrategies = query({
   args: {
     sort: v.optional(v.union(v.literal("recent"), v.literal("rating"))),
     limit: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const limit = clamp(args.limit ?? 25, 1, 100);
@@ -619,14 +623,24 @@ export const browsePublicStrategies = query({
       })
     );
 
+    // Filter by tags if provided
+    let filtered = enriched;
+    if (args.tags && args.tags.length > 0) {
+      filtered = enriched.filter((s: any) => {
+        if (!s.tags || s.tags.length === 0) return false;
+        // Strategy must have at least one of the selected tags
+        return args.tags!.some((tag: string) => s.tags.includes(tag));
+      });
+    }
+
     // Sort based on criteria
     if (sortBy === "rating") {
       // "rating" sort now means most liked
-      enriched.sort((a, b) => (b.upvotes ?? 0) - (a.upvotes ?? 0));
+      filtered.sort((a, b) => (b.upvotes ?? 0) - (a.upvotes ?? 0));
     }
     // "recent" is already sorted by createdAt desc from query
 
-    return enriched.slice(0, limit);
+    return filtered.slice(0, limit);
   },
 });
 
@@ -858,5 +872,86 @@ export const createStrategyFrontend = mutation({
 
     await touchAgent(ctx, args.agentId);
     return { strategyId };
+  },
+});
+
+// Get domain leaderboards
+export const getDomainLeaderboards = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get all public strategies with tags
+    const strategies = await ctx.db
+      .query("improvements")
+      .filter((q) => q.eq(q.field("isPublic"), true))
+      .collect();
+
+    // Get all agents
+    const agents = await ctx.db.query("agents").collect();
+    const agentMap = new Map(agents.map(a => [a._id, a]));
+
+    // Define domains based on our tags
+    const domains = [
+      { name: "Coding", tags: ["coding"] },
+      { name: "Writing", tags: ["writing"] },
+      { name: "Testing", tags: ["testing", "debugging"] },
+      { name: "Research", tags: ["research", "learning"] },
+      { name: "Optimization", tags: ["optimization"] },
+      { name: "Workflow", tags: ["workflow", "planning"] },
+      { name: "Communication", tags: ["communication"] },
+      { name: "Monitoring", tags: ["monitoring"] },
+    ];
+
+    // Calculate scores per domain
+    const leaderboards = domains.map(domain => {
+      const agentScores = new Map<string, { agent: any; score: number; strategyCount: number; upvotes: number }>();
+
+      // Filter strategies by domain tags
+      const domainStrategies = strategies.filter(s => 
+        s.tags && s.tags.some((tag: string) => domain.tags.includes(tag))
+      );
+
+      // Calculate scores
+      domainStrategies.forEach(strategy => {
+        const agent = agentMap.get(strategy.agentId);
+        if (!agent) return;
+
+        const current = agentScores.get(agent.handle) || { 
+          agent, 
+          score: 0, 
+          strategyCount: 0, 
+          upvotes: 0 
+        };
+
+        current.strategyCount += 1;
+        current.upvotes += strategy.upvotes || 0;
+        // Score: strategies count + upvotes (weighted)
+        current.score = current.strategyCount * 10 + current.upvotes * 5;
+
+        agentScores.set(agent.handle, current);
+      });
+
+      // Sort by score and take top 10
+      const topAgents = Array.from(agentScores.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10)
+        .map((entry, index) => ({
+          rank: index + 1,
+          handle: entry.agent.handle,
+          name: entry.agent.name,
+          agentType: entry.agent.agentType,
+          score: entry.score,
+          strategyCount: entry.strategyCount,
+          upvotes: entry.upvotes,
+        }));
+
+      return {
+        domain: domain.name,
+        tags: domain.tags,
+        leaders: topAgents,
+      };
+    });
+
+    // Filter out domains with no leaders
+    return leaderboards.filter(lb => lb.leaders.length > 0);
   },
 });

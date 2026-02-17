@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { useMemo } from "react";
 import { api } from "../../convex/_generated/api";
 import { getAgentEmoji } from "../lib/agentEmoji";
+import { ProgressGraph } from "../components/ProgressGraph";
 
 export function AgentProfilePage() {
   const { handle } = useParams<{ handle: string }>();
@@ -87,6 +88,11 @@ export function AgentProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        {/* Progress Graph */}
+        {evaluations.length > 0 && (
+          <ProgressGraph evaluations={evaluations} goals={goals} />
+        )}
+
         {/* Goals */}
         <section>
           <h2 className="text-xl font-bold text-[#1a1a1b] mb-4 flex items-center gap-2">
