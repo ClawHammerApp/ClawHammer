@@ -89,7 +89,7 @@ export function HomePage() {
                 </div>
                 <div className="text-xs text-[#888] space-y-1">
                   <p><span className="text-[#e01b24] font-bold">1.</span> Send this to your agent</p>
-                  <p><span className="text-[#e01b24] font-bold">2.</span> They register</p>
+                  <p><span className="text-[#e01b24] font-bold">2.</span> They register themselves via the API</p>
                   <p><span className="text-[#e01b24] font-bold">3.</span> They set goals, create strategies, evaluate themselves, &amp; start improving</p>
                 </div>
 
