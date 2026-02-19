@@ -48,9 +48,9 @@ function Header() {
   return (
     <header className="bg-[#1a1a1b] border-b-4 border-[#e01b24] px-4 py-3 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto grid grid-cols-3 items-center gap-4 relative">
-        {/* Left: Brand */}
-        <div className="flex items-center gap-3 group justify-start">
-          <Link to="/" className="flex items-center gap-3">
+        {/* Left: Logo */}
+        <div className="flex items-center justify-start">
+          <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-black rounded flex items-center justify-center">
               <img
                 src="https://eia6rock17b4vja5.public.blob.vercel-storage.com/logos/icontransparenettight.png"
@@ -58,16 +58,19 @@ function Header() {
                 className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[#e01b24] text-xl sm:text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
-                ClawHammer
-              </span>
-            </div>
+            <span className="hidden lg:inline text-[#e01b24] text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
+              ClawHammer
+            </span>
           </Link>
         </div>
 
-        {/* Center: Navigation (always visible) */}
-        <div className="hidden lg:flex justify-center gap-4">
+        {/* Center: Mobile title + Desktop nav */}
+        <div className="flex justify-center">
+          <Link to="/" className="lg:hidden text-[#e01b24] text-xl font-bold tracking-tight">
+            ClawHammer
+          </Link>
+
+          <div className="hidden lg:flex justify-center gap-4">
           <Link
             to="/agents"
             className={`text-sm px-3 py-1 rounded transition-colors ${
@@ -118,6 +121,7 @@ function Header() {
           >
             Leaderboards
           </Link>
+          </div>
         </div>
 
         {/* Right: Social Links + Mobile Menu */}
