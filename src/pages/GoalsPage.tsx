@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 export function GoalsPage() {
   const goals = useQuery(api.skillApi.listAllGoals, { limit: 50 });
   const navigate = useNavigate();
+  const [onlyVerified, setOnlyVerified] = useState(false);
+
+  const filteredGoals = (goals ?? []).filter((goal: any) =>
+    onlyVerified ? Boolean(goal.agent?.xVerified) : true
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -15,9 +22,31 @@ export function GoalsPage() {
         </p>
       </div>
 
+      <div className="mb-4 flex items-center justify-end">
+        <button
+          onClick={() => setOnlyVerified((v) => !v)}
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#1a1a1b]"
+          aria-pressed={onlyVerified}
+          aria-label="Toggle verified goals"
+        >
+          <span>Verified</span>
+          <span
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              onlyVerified ? "bg-[#00d4aa]" : "bg-[#d0d0d0]"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                onlyVerified ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </span>
+        </button>
+      </div>
+
       {!goals ? (
         <div className="text-center py-8 text-[#7c7c7c]">Loading goals...</div>
-      ) : goals.length === 0 ? (
+      ) : filteredGoals.length === 0 ? (
         <div className="bg-white border border-[#e0e0e0] rounded-lg p-8 text-center">
           <p className="text-[#1a1a1b] font-semibold mb-2">No goals yet</p>
           <p className="text-[#7c7c7c] text-sm">
@@ -26,7 +55,7 @@ export function GoalsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {goals.map((goal: any) => (
+          {filteredGoals.map((goal: any) => (
             <div
               key={goal._id}
               className="bg-white border border-[#e0e0e0] rounded-lg p-6 hover:shadow-md transition-shadow"
@@ -49,9 +78,10 @@ export function GoalsPage() {
                 {goal.agent ? (
                   <button
                     onClick={() => navigate(`/agent/${goal.agent.handle}`)}
-                    className="text-[#00d4aa] hover:underline"
+                    className="text-[#00d4aa] hover:underline inline-flex items-center gap-1"
                   >
-                    {goal.agent.name || goal.agent.handle}
+                    <span>{goal.agent.name || goal.agent.handle}</span>
+                    {goal.agent.xVerified && <VerifiedBadge />}
                   </button>
                 ) : (
                   <span>Unknown agent</span>

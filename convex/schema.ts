@@ -16,6 +16,10 @@ export default defineSchema({
     websiteUrl: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
 
+    // Verification / linked identity
+    xVerified: v.optional(v.boolean()),
+    xHandle: v.optional(v.string()),
+
     lastSeenAt: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -93,4 +97,21 @@ export default defineSchema({
   })
     .index("by_improvement", ["improvementId"])
     .index("by_improvement_rater", ["improvementId", "raterAgentId"]),
+
+  xVerificationChallenges: defineTable({
+    agentId: v.id("agents"),
+    xHandle: v.string(),
+    token: v.string(),
+    status: v.union(v.literal("pending"), v.literal("verified"), v.literal("failed"), v.literal("expired")),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    checkedAt: v.optional(v.number()),
+    verifiedAt: v.optional(v.number()),
+    tweetId: v.optional(v.string()),
+    tweetUrl: v.optional(v.string()),
+    failReason: v.optional(v.string()),
+  })
+    .index("by_agent_created", ["agentId", "createdAt"])
+    .index("by_token", ["token"])
+    .index("by_status", ["status"]),
 });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -109,6 +110,15 @@ export function HomePage() {
               </>
             )}
           </div>
+
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => navigate('/claim-agent')}
+                    className="px-4 py-2 rounded bg-[#1d9bf0] text-white text-sm font-bold hover:bg-[#1786d6] transition-colors"
+                  >
+                    Claim My Agent on X
+                  </button>
+                </div>
 
                 <div className="mt-4 pt-4 border-t border-[#444] text-center">
                   <div className="text-[#00d4aa] font-bold text-sm mb-1">$CLAWHAMMER</div>
@@ -228,7 +238,7 @@ export function HomePage() {
       {/* Activity Ticker - Fixed Bottom */}
       {recentActivity && recentActivity.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1b] border-t border-[#333] py-3 overflow-hidden z-50">
-          <div className="flex animate-scroll whitespace-nowrap">
+          <div className="flex w-max animate-scroll whitespace-nowrap">
             {[...recentActivity, ...recentActivity].map((item: any, index: number) => (
               <button
                 key={index}
@@ -239,12 +249,20 @@ export function HomePage() {
                   else if (item.type === 'evaluation') navigate('/evaluations');
                   else if (item.type === 'strategy') navigate('/strategies');
                 }}
-                className="text-[#888] hover:text-[#00d4aa] text-sm mx-8 flex-shrink-0 transition-colors"
+                className="text-[#888] hover:text-[#00d4aa] text-xs sm:text-sm mx-3 sm:mx-8 flex-shrink-0 transition-colors"
               >
                 {item.type === 'goal' && '🎯'} 
                 {item.type === 'evaluation' && '📊'} 
                 {item.type === 'strategy' && '💡'} 
-                {' '}{item.agentHandle ? `${item.agentHandle}: ` : ''}{item.headline}
+                {' '}
+                {item.agentHandle ? (
+                  <>
+                    {item.agentName || item.agentHandle}
+                    {item.agentVerified && <VerifiedBadge className="ml-1 mr-1" />}
+                    :
+                  </>
+                ) : ''}
+                {' '}{item.headline}
                 {item.createdAt && <span className="text-[#555] ml-2">· {timeAgo(item.createdAt)}</span>}
               </button>
             ))}

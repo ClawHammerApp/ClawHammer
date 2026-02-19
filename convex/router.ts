@@ -40,6 +40,37 @@ async function readJson(req: Request) {
   }
 }
 
+function envNumber(name: string, fallback: number) {
+  const raw = process.env[name];
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) ? n : fallback;
+}
+
+async function xLookupUserByHandle(handle: string) {
+  const bearer = process.env.X_BEARER_TOKEN;
+  if (!bearer) throw new Error("X_BEARER_TOKEN is not configured");
+
+  const res = await fetch(`https://api.x.com/2/users/by/username/${encodeURIComponent(handle)}`, {
+    headers: { Authorization: `Bearer ${bearer}` },
+  });
+  if (!res.ok) throw new Error(`X user lookup failed (${res.status})`);
+  const json: any = await res.json();
+  return json?.data ?? null;
+}
+
+async function xFetchRecentPosts(userId: string, maxResults = 10) {
+  const bearer = process.env.X_BEARER_TOKEN;
+  if (!bearer) throw new Error("X_BEARER_TOKEN is not configured");
+
+  const url = `https://api.x.com/2/users/${encodeURIComponent(userId)}/tweets?max_results=${maxResults}&tweet.fields=created_at,text`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${bearer}` },
+  });
+  if (!res.ok) throw new Error(`X posts lookup failed (${res.status})`);
+  const json: any = await res.json();
+  return Array.isArray(json?.data) ? json.data : [];
+}
+
 // ---- PUBLIC homepage metrics ----
 router.route({
   path: "/api/metrics",
@@ -318,6 +349,120 @@ router.route({
     });
 
     return jsonResponse(result);
+  }),
+});
+
+router.route({
+  path: "/api/verifications/x/start",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const agentHandle = await getAuthenticatedAgent(ctx, req);
+    if (!agentHandle) return jsonResponse({ ok: false, error: "Unauthorized" }, 401);
+
+    const body = await readJson(req);
+    const xHandle = String(body?.xHandle ?? "").replace(/^@/, "").trim();
+    if (!xHandle) return jsonResponse({ ok: false, error: "xHandle is required" }, 400);
+
+    const holdEnabled = String(process.env.X_VERIFY_HOLD_ON_SURGE ?? "false").toLowerCase() === "true";
+    if (holdEnabled) {
+      const windowMin = envNumber("X_VERIFY_SURGE_WINDOW_MIN", 10);
+      const maxInWindow = envNumber("X_VERIFY_SURGE_MAX_CHALLENGES_PER_WINDOW", 50);
+      const sinceMs = Date.now() - windowMin * 60 * 1000;
+      const recentCount = await ctx.runQuery(api.skillApi.countRecentXVerificationChallenges, { sinceMs });
+      if (recentCount >= maxInWindow) {
+        return jsonResponse(
+          {
+            ok: false,
+            error: "Verification temporarily on hold due to high demand",
+            message:
+              process.env.X_VERIFY_HOLD_MESSAGE ||
+              "Verification temporarily paused due to high demand. Please try again shortly.",
+          },
+          429
+        );
+      }
+    }
+
+    const ttlMinutes = envNumber("X_VERIFY_CHALLENGE_TTL_MIN", 15);
+    const challenge = await ctx.runMutation(api.skillApi.startXVerificationChallenge, {
+      agentHandle,
+      xHandle,
+      ttlMinutes,
+    });
+
+    return jsonResponse({ ok: true, ...challenge });
+  }),
+});
+
+router.route({
+  path: "/api/verifications/x/check",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const agentHandle = await getAuthenticatedAgent(ctx, req);
+    if (!agentHandle) return jsonResponse({ ok: false, error: "Unauthorized" }, 401);
+
+    const body = await readJson(req);
+    const challengeId = String(body?.challengeId ?? "");
+    if (!challengeId) return jsonResponse({ ok: false, error: "challengeId is required" }, 400);
+
+    const challenge: any = await ctx.runQuery(api.skillApi.getXVerificationChallenge, {
+      challengeId: challengeId as any,
+    });
+
+    if (!challenge) return jsonResponse({ ok: false, error: "Challenge not found" }, 404);
+    if (challenge.status !== "pending") {
+      return jsonResponse({ ok: true, status: challenge.status, alreadyProcessed: true });
+    }
+
+    const maxPostChecks = envNumber("X_VERIFY_MAX_POST_READ_CHECKS", 8);
+    try {
+      const user = await xLookupUserByHandle(challenge.xHandle);
+      if (!user?.id) {
+        await ctx.runMutation(api.skillApi.completeXVerificationChallenge, {
+          challengeId: challengeId as any,
+          status: "failed",
+          failReason: "X handle not found",
+        });
+        return jsonResponse({ ok: false, error: "X handle not found" }, 400);
+      }
+
+      const posts = await xFetchRecentPosts(user.id, Math.min(10, maxPostChecks));
+      const matched = posts.find((p: any) => {
+        const text = String(p?.text ?? "");
+        const createdAt = p?.created_at ? new Date(p.created_at).getTime() : 0;
+        return text.includes(challenge.token) && createdAt >= challenge.createdAt && createdAt <= challenge.expiresAt;
+      });
+
+      if (!matched) {
+        const expired = Date.now() > challenge.expiresAt;
+        await ctx.runMutation(api.skillApi.completeXVerificationChallenge, {
+          challengeId: challengeId as any,
+          status: expired ? "expired" : "failed",
+          failReason: expired ? "Challenge expired" : "Verification token not found in recent posts",
+        });
+        return jsonResponse({ ok: false, status: expired ? "expired" : "failed" }, expired ? 410 : 404);
+      }
+
+      const tweetId = String(matched.id ?? "");
+      const tweetUrl = `https://x.com/${challenge.xHandle}/status/${tweetId}`;
+
+      await ctx.runMutation(api.skillApi.completeXVerificationChallenge, {
+        challengeId: challengeId as any,
+        status: "verified",
+        tweetId,
+        tweetUrl,
+      });
+
+      return jsonResponse({
+        ok: true,
+        status: "verified",
+        tweetId,
+        tweetUrl,
+        xHandle: challenge.xHandle,
+      });
+    } catch (error: any) {
+      return jsonResponse({ ok: false, error: error?.message || "X verification check failed" }, 500);
+    }
   }),
 });
 

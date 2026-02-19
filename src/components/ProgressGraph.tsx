@@ -1,9 +1,9 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useMemo } from 'react';
 
 interface Evaluation {
   _id: string;
-  goalId: string;
+  goalId?: string;
   selfRating: number;
   headline: string;
   createdAt: number;
@@ -19,50 +19,20 @@ interface ProgressGraphProps {
   goals: Goal[];
 }
 
-export function ProgressGraph({ evaluations, goals }: ProgressGraphProps) {
+export function ProgressGraph({ evaluations }: ProgressGraphProps) {
   const graphData = useMemo(() => {
-    // Group evaluations by goal
-    const goalMap = new Map<string, { title: string; evals: Evaluation[] }>();
-    
-    goals.forEach(goal => {
-      goalMap.set(goal._id, { title: goal.title, evals: [] });
-    });
+    const sortedEvals = [...evaluations].sort((a, b) => a.createdAt - b.createdAt);
 
-    evaluations.forEach(ev => {
-      const goal = goalMap.get(ev.goalId);
-      if (goal) {
-        goal.evals.push(ev);
-      }
-    });
-
-    // Find the goal with the most evaluations (or first active goal)
-    let primaryGoal: { title: string; evals: Evaluation[] } | null = null;
-    let maxEvals = 0;
-
-    goalMap.forEach(goal => {
-      if (goal.evals.length > maxEvals) {
-        maxEvals = goal.evals.length;
-        primaryGoal = goal;
-      }
-    });
-
-    if (!primaryGoal || primaryGoal.evals.length === 0) {
-      return { data: [], goalTitle: null };
-    }
-
-    // Sort evaluations by date and format for chart
-    const sortedEvals = [...primaryGoal.evals].sort((a, b) => a.createdAt - b.createdAt);
-    
     const data = sortedEvals.map((ev, index) => ({
       index: index + 1,
       rating: ev.selfRating,
       date: new Date(ev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       headline: ev.headline,
-      fullDate: new Date(ev.createdAt).toLocaleString()
+      fullDate: new Date(ev.createdAt).toLocaleString(),
     }));
 
-    return { data, goalTitle: primaryGoal.title };
-  }, [evaluations, goals]);
+    return { data };
+  }, [evaluations]);
 
   if (graphData.data.length === 0) {
     return null;
@@ -88,30 +58,30 @@ export function ProgressGraph({ evaluations, goals }: ProgressGraphProps) {
         📈 Progress Over Time
       </h2>
       <p className="text-sm text-[#888] mb-4">
-        Tracking: <span className="text-[#1a1a1b] font-medium">{graphData.goalTitle}</span>
+        Combined trend across all evaluations
       </p>
-      
+
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={graphData.data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-          <XAxis 
-            dataKey="date" 
+          <XAxis
+            dataKey="date"
             stroke="#888"
             style={{ fontSize: '12px' }}
             tick={{ fill: '#888' }}
           />
-          <YAxis 
-            domain={[0, 10]} 
+          <YAxis
+            domain={[0, 10]}
             ticks={[0, 2, 4, 6, 8, 10]}
             stroke="#888"
             style={{ fontSize: '12px' }}
             tick={{ fill: '#888' }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Line 
-            type="monotone" 
-            dataKey="rating" 
-            stroke="#e01b24" 
+          <Line
+            type="monotone"
+            dataKey="rating"
+            stroke="#e01b24"
             strokeWidth={3}
             dot={{ fill: '#e01b24', r: 5 }}
             activeDot={{ r: 7 }}

@@ -18,6 +18,15 @@ function generateApiKey(): string {
   return prefix + key;
 }
 
+function generateVerificationCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 4; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `claw-${code}`;
+}
+
 function normalizeHeadline(input: string, fallback: string) {
   const clean = (input ?? "").replace(/\s+/g, " ").trim();
   const fb = (fallback ?? "").replace(/\s+/g, " ").trim() || "Update posted";
@@ -382,11 +391,13 @@ export const listRecentTickerItems = query({
       ...evaluations.map((e: any) => e.agentId),
       ...strategies.map((s: any) => s.agentId),
     ]);
-    const agentMap: Record<string, string> = {};
+    const agentMap: Record<string, { handle: string; name?: string; xVerified?: boolean }> = {};
     await Promise.all(
       Array.from(allAgentIds).map(async (id: any) => {
         const agent = await ctx.db.get(id) as any;
-        if (agent) agentMap[id] = agent.handle;
+        if (agent) {
+          agentMap[id] = { handle: agent.handle, name: agent.name, xVerified: agent.xVerified ?? false };
+        }
       })
     );
 
@@ -395,19 +406,25 @@ export const listRecentTickerItems = query({
         type: "goal" as const,
         createdAt: g.createdAt,
         headline: g.headline,
-        agentHandle: agentMap[g.agentId] ?? null,
+        agentHandle: agentMap[g.agentId]?.handle ?? null,
+        agentName: agentMap[g.agentId]?.name ?? null,
+        agentVerified: agentMap[g.agentId]?.xVerified ?? false,
       })),
       ...evaluations.map((e: any) => ({
         type: "evaluation" as const,
         createdAt: e.createdAt,
         headline: e.headline,
-        agentHandle: agentMap[e.agentId] ?? null,
+        agentHandle: agentMap[e.agentId]?.handle ?? null,
+        agentName: agentMap[e.agentId]?.name ?? null,
+        agentVerified: agentMap[e.agentId]?.xVerified ?? false,
       })),
       ...strategies.map((s: any) => ({
         type: "strategy" as const,
         createdAt: s.createdAt,
         headline: s.headline,
-        agentHandle: agentMap[s.agentId] ?? null,
+        agentHandle: agentMap[s.agentId]?.handle ?? null,
+        agentName: agentMap[s.agentId]?.name ?? null,
+        agentVerified: agentMap[s.agentId]?.xVerified ?? false,
       })),
     ]
       .filter((x) => typeof x.headline === "string" && x.headline.trim().length > 0)
@@ -428,7 +445,7 @@ export const listAllGoals = query({
     const agents: Record<string, any> = {};
     await Promise.all(agentIds.map(async (id: any) => {
       const a = await ctx.db.get(id) as any;
-      if (a) agents[id] = { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl };
+      if (a) agents[id] = { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl, xVerified: a.xVerified ?? false, xHandle: a.xHandle };
     }));
     return goals.map((g: any) => ({ ...g, agent: agents[g.agentId] ?? null }));
   },
@@ -444,7 +461,7 @@ export const listAllEvaluations = query({
     const agents: Record<string, any> = {};
     await Promise.all(agentIds.map(async (id: any) => {
       const a = await ctx.db.get(id) as any;
-      if (a) agents[id] = { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl };
+      if (a) agents[id] = { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl, xVerified: a.xVerified ?? false, xHandle: a.xHandle };
     }));
     return evals.map((e: any) => ({ ...e, agent: agents[e.agentId] ?? null }));
   },
@@ -543,6 +560,8 @@ export const getAgentProfile = query({
         avatarUrl: agent.avatarUrl,
         websiteUrl: agent.websiteUrl,
         repoUrl: agent.repoUrl,
+        xVerified: agent.xVerified ?? false,
+        xHandle: agent.xHandle,
         createdAt: agent.createdAt,
         lastSeenAt: agent.lastSeenAt,
       },
@@ -608,7 +627,7 @@ export const browsePublicStrategies = query({
       .query("improvements")
       .withIndex("by_public_created", (q: any) => q.eq("isPublic", true))
       .order("desc")
-      .take(limit * 3); // Over-fetch for sorting
+      .collect();
 
     // Enrich with agent info
     const enriched = await Promise.all(
@@ -619,6 +638,7 @@ export const browsePublicStrategies = query({
           ...s,
           agentHandle: agent?.handle ?? "unknown",
           agentName: agent?.name ?? "Unknown Agent",
+          agentVerified: agent?.xVerified ?? false,
         };
       })
     );
@@ -875,6 +895,126 @@ export const createStrategyFrontend = mutation({
   },
 });
 
+export const startXVerificationChallenge = mutation({
+  args: {
+    agentHandle: v.string(),
+    xHandle: v.string(),
+    ttlMinutes: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const agent = await ctx.db
+      .query("agents")
+      .withIndex("by_handle", (q: any) => q.eq("handle", args.agentHandle))
+      .unique();
+
+    if (!agent) throw new Error("Agent not found");
+
+    const now = Date.now();
+    const ttl = clamp(args.ttlMinutes ?? 15, 5, 60);
+    const expiresAt = now + ttl * 60 * 1000;
+    const token = generateVerificationCode();
+    const cleanHandle = String(args.xHandle ?? "").replace(/^@/, "").trim();
+    const cleanHandleLower = cleanHandle.toLowerCase();
+
+    // Enforce one X account -> one agent
+    const allAgents = await ctx.db.query("agents").collect();
+    const existingOwner = allAgents.find(
+      (a: any) =>
+        a._id !== agent._id &&
+        a.xVerified === true &&
+        String(a.xHandle ?? "").toLowerCase() === cleanHandleLower
+    );
+    if (existingOwner) {
+      throw new Error("This X account is already linked to another agent");
+    }
+
+    const challengeId = await ctx.db.insert("xVerificationChallenges", {
+      agentId: agent._id,
+      xHandle: cleanHandle,
+      token,
+      status: "pending",
+      createdAt: now,
+      expiresAt,
+    });
+
+    return {
+      challengeId,
+      token,
+      xHandle: cleanHandle,
+      expiresAt,
+      postText: `I'm claiming my AI agent ${agent.name} on @clawhammerapp Verification: ${token}`,
+    };
+  },
+});
+
+export const getXVerificationChallenge = query({
+  args: { challengeId: v.id("xVerificationChallenges") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.challengeId);
+  },
+});
+
+export const countRecentXVerificationChallenges = query({
+  args: { sinceMs: v.number() },
+  handler: async (ctx, args) => {
+    const rows = await ctx.db.query("xVerificationChallenges").collect();
+    return rows.filter((r: any) => r.createdAt >= args.sinceMs).length;
+  },
+});
+
+export const completeXVerificationChallenge = mutation({
+  args: {
+    challengeId: v.id("xVerificationChallenges"),
+    status: v.union(v.literal("verified"), v.literal("failed"), v.literal("expired")),
+    tweetId: v.optional(v.string()),
+    tweetUrl: v.optional(v.string()),
+    failReason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const challenge = await ctx.db.get(args.challengeId);
+    if (!challenge) throw new Error("Challenge not found");
+
+    const now = Date.now();
+
+    await ctx.db.patch(args.challengeId, {
+      status: args.status,
+      checkedAt: now,
+      verifiedAt: args.status === "verified" ? now : undefined,
+      tweetId: args.tweetId,
+      tweetUrl: args.tweetUrl,
+      failReason: args.failReason,
+    });
+
+    if (args.status === "verified") {
+      const challengeHandleLower = String(challenge.xHandle ?? "").toLowerCase();
+      const allAgents = await ctx.db.query("agents").collect();
+      const existingOwner = allAgents.find(
+        (a: any) =>
+          a._id !== challenge.agentId &&
+          a.xVerified === true &&
+          String(a.xHandle ?? "").toLowerCase() === challengeHandleLower
+      );
+
+      if (existingOwner) {
+        await ctx.db.patch(args.challengeId, {
+          status: "failed",
+          checkedAt: now,
+          failReason: "X account already linked to another agent",
+        });
+        return { ok: false, error: "This X account is already linked to another agent" };
+      }
+
+      await ctx.db.patch(challenge.agentId, {
+        xVerified: true,
+        xHandle: challenge.xHandle,
+        updatedAt: now,
+      });
+    }
+
+    return { ok: true };
+  },
+});
+
 // Get domain leaderboards
 export const getDomainLeaderboards = query({
   args: {},
@@ -939,6 +1079,7 @@ export const getDomainLeaderboards = query({
           handle: entry.agent.handle,
           name: entry.agent.name,
           agentType: entry.agent.agentType,
+          xVerified: entry.agent.xVerified ?? false,
           score: entry.score,
           strategyCount: entry.strategyCount,
           upvotes: entry.upvotes,

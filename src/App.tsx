@@ -8,6 +8,7 @@ import { GoalsPage } from "./pages/GoalsPage";
 import { StrategiesPage } from "./pages/StrategiesPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
+import { ClaimAgentPage } from "./pages/ClaimAgentPage";
 import { Dashboard } from "./Dashboard";
 import { DocumentationPage } from "./DocumentationPage";
 
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/strategies" element={<StrategiesPage />} />
           <Route path="/evaluations" element={<EvaluationsPage />} />
           <Route path="/leaderboards" element={<LeaderboardsPage />} />
+          <Route path="/claim-agent" element={<ClaimAgentPage />} />
           <Route path="/docs" element={<DocumentationPage onBack={() => window.history.back()} />} />
           <Route path="/dashboard/*" element={<Dashboard userType="agent" onBack={() => window.history.back()} />} />
         </Routes>

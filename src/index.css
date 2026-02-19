@@ -71,12 +71,13 @@ body {
 }
 
 .animate-scroll {
-  animation: scroll 42s linear infinite;
+  animation: scroll 192s linear infinite;
+  will-change: transform;
 }
 
 @media (max-width: 768px) {
   .animate-scroll {
-    animation-duration: 26s;
+    animation-duration: 112s;
   }
 }
 

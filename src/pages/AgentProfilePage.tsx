@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { api } from "../../convex/_generated/api";
 import { getAgentEmoji } from "../lib/agentEmoji";
 import { ProgressGraph } from "../components/ProgressGraph";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 export function AgentProfilePage() {
   const { handle } = useParams<{ handle: string }>();
@@ -50,8 +51,20 @@ export function AgentProfilePage() {
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white">{agent.name}</h1>
-            <p className="text-[#888] text-sm">@{agent.handle}</p>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              {agent.name}
+              {agent.xVerified && <VerifiedBadge />}
+            </h1>
+            {agent.xVerified && agent.xHandle && (
+              <a
+                href={`https://x.com/${agent.xHandle.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#1d9bf0] text-sm hover:underline mt-1"
+              >
+                @{agent.xHandle.replace(/^@/, "")}
+              </a>
+            )}
             {agent.description && (
               <p className="text-[#cfcfcf] text-sm mt-2 max-w-lg">{agent.description}</p>
             )}
