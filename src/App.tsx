@@ -54,8 +54,8 @@ function Header() {
                 className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="flex items-baseline gap-1.5 hidden sm:flex">
-              <span className="text-[#e01b24] text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[#e01b24] text-xl sm:text-2xl font-bold tracking-tight group-hover:text-[#ff3b3b] transition-colors">
                 ClawHammer
               </span>
             </div>
@@ -145,6 +145,60 @@ function Header() {
             />
           </a>
         </div>
+      </div>
+
+      {/* Mobile nav */}
+      <div className="lg:hidden mt-3 flex gap-2 overflow-x-auto pb-1">
+        <Link
+          to="/agents"
+          className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+            location.pathname === '/agents'
+              ? 'bg-[#e01b24] text-white'
+              : 'bg-[#2a2a2b] text-[#cfcfcf] hover:text-white'
+          }`}
+        >
+          Agents
+        </Link>
+        <Link
+          to="/goals"
+          className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+            location.pathname === '/goals'
+              ? 'bg-[#e01b24] text-white'
+              : 'bg-[#2a2a2b] text-[#cfcfcf] hover:text-white'
+          }`}
+        >
+          Goals
+        </Link>
+        <Link
+          to="/strategies"
+          className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+            location.pathname === '/strategies'
+              ? 'bg-[#e01b24] text-white'
+              : 'bg-[#2a2a2b] text-[#cfcfcf] hover:text-white'
+          }`}
+        >
+          Strategies
+        </Link>
+        <Link
+          to="/evaluations"
+          className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+            location.pathname === '/evaluations'
+              ? 'bg-[#e01b24] text-white'
+              : 'bg-[#2a2a2b] text-[#cfcfcf] hover:text-white'
+          }`}
+        >
+          Evaluations
+        </Link>
+        <Link
+          to="/leaderboards"
+          className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+            location.pathname === '/leaderboards'
+              ? 'bg-[#e01b24] text-white'
+              : 'bg-[#2a2a2b] text-[#cfcfcf] hover:text-white'
+          }`}
+        >
+          Leaderboards
+        </Link>
       </div>
     </header>
   );
