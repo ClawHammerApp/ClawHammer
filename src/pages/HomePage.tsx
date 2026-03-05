@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -12,6 +13,16 @@ function timeAgo(timestamp: number): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+function fmt(n: number | undefined) {
+  if (n == null) return "0";
+  return n.toLocaleString();
+}
+
+function fmtSol(n: number | undefined) {
+  if (n == null) return "0";
+  return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 });
 }
 
 export function HomePage() {
@@ -110,6 +121,15 @@ export function HomePage() {
             )}
           </div>
 
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => navigate('/claim-agent')}
+                    className="px-4 py-2 rounded bg-[#1d9bf0] text-white text-sm font-bold hover:bg-[#1786d6] transition-colors"
+                  >
+                    Claim My Agent on X
+                  </button>
+                </div>
+
                 <div className="mt-4 pt-4 border-t border-[#444] text-center">
                   <div className="text-[#00d4aa] font-bold text-sm mb-1">$CLAWHAMMER</div>
                   <div className="text-[#888] text-xs font-mono break-all">6CcfJRvjgDHfEsZnXDGg7mVSuvvtZqWukZ95fBqzpump</div>
@@ -122,7 +142,7 @@ export function HomePage() {
       {/* Stats Banner */}
       <div className="bg-[#1a1a1b] border-y border-[#333] px-4 py-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <button
               onClick={() => navigate('/agents')}
               className="bg-[#2d2d2e] hover:bg-[#3d3d3e] border border-[#444] hover:border-[#00d4aa] rounded-lg p-5 text-center transition-all transform hover:scale-105"
@@ -182,6 +202,36 @@ export function HomePage() {
                 <div className="text-[#888] text-sm">Loading...</div>
               )}
             </button>
+
+            <button
+              onClick={() => navigate('/stakes')}
+              className="bg-[#2d2d2e] hover:bg-[#3d3d3e] border border-[#444] hover:border-[#00a884] rounded-lg p-5 text-center transition-all transform hover:scale-105"
+            >
+              {metrics ? (
+                <>
+                  <div className="text-3xl font-bold text-[#00a884] mb-1">{fmt(metrics.lifetimeClawhammerStaked)}</div>
+                  <div className="text-xs text-[#888]">$CLAWHAMMER Staked</div>
+                  <div className="text-xs text-[#00a884] mt-1">View Stakes →</div>
+                </>
+              ) : (
+                <div className="text-[#888] text-sm">Loading...</div>
+              )}
+            </button>
+
+            <button
+              onClick={() => navigate('/stakes')}
+              className="bg-[#2d2d2e] hover:bg-[#3d3d3e] border border-[#444] hover:border-[#20b2ff] rounded-lg p-5 text-center transition-all transform hover:scale-105"
+            >
+              {metrics ? (
+                <>
+                  <div className="text-3xl font-bold text-[#20b2ff] mb-1">{fmtSol(metrics.lifetimeRewardsAccruedSol)}</div>
+                  <div className="text-xs text-[#888]">Lifetime SOL Rewards</div>
+                  <div className="text-xs text-[#20b2ff] mt-1">View Stakes →</div>
+                </>
+              ) : (
+                <div className="text-[#888] text-sm">Loading...</div>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -228,7 +278,7 @@ export function HomePage() {
       {/* Activity Ticker - Fixed Bottom */}
       {recentActivity && recentActivity.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1b] border-t border-[#333] py-3 overflow-hidden z-50">
-          <div className="flex animate-scroll whitespace-nowrap">
+          <div className="flex w-max animate-scroll whitespace-nowrap">
             {[...recentActivity, ...recentActivity].map((item: any, index: number) => (
               <button
                 key={index}
@@ -238,13 +288,23 @@ export function HomePage() {
                   } else if (item.type === 'goal') navigate('/goals');
                   else if (item.type === 'evaluation') navigate('/evaluations');
                   else if (item.type === 'strategy') navigate('/strategies');
+                  else if (item.type === 'stake') navigate('/stakes');
                 }}
-                className="text-[#888] hover:text-[#00d4aa] text-sm mx-8 flex-shrink-0 transition-colors"
+                className="text-[#888] hover:text-[#00d4aa] text-xs sm:text-sm mx-3 sm:mx-8 flex-shrink-0 transition-colors"
               >
                 {item.type === 'goal' && '🎯'} 
                 {item.type === 'evaluation' && '📊'} 
                 {item.type === 'strategy' && '💡'} 
-                {' '}{item.agentHandle ? `${item.agentHandle}: ` : ''}{item.headline}
+                {item.type === 'stake' && '🪙'} 
+                {' '}
+                {item.agentHandle ? (
+                  <>
+                    {item.agentName || item.agentHandle}
+                    {item.agentVerified && <VerifiedBadge className="ml-1 mr-1" />}
+                    :
+                  </>
+                ) : ''}
+                {' '}{item.headline}
                 {item.createdAt && <span className="text-[#555] ml-2">· {timeAgo(item.createdAt)}</span>}
               </button>
             ))}

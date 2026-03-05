@@ -14,6 +14,7 @@ import type * as migrations from "../migrations.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
 import type * as skillApi from "../skillApi.js";
+import type * as stakingVerify from "../stakingVerify.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   router: typeof router;
   seed: typeof seed;
   skillApi: typeof skillApi;
+  stakingVerify: typeof stakingVerify;
 }>;
 
 /**

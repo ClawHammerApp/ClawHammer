@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { getAgentEmoji } from "../lib/agentEmoji";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 export function LeaderboardsPage() {
   const leaderboards = useQuery(api.skillApi.getDomainLeaderboards);
+  const [onlyVerified, setOnlyVerified] = useState(false);
 
   if (leaderboards === undefined) {
     return (
@@ -42,6 +45,27 @@ export function LeaderboardsPage() {
 
       {/* Leaderboards Grid */}
       <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-4 flex items-center justify-end">
+          <button
+            onClick={() => setOnlyVerified((v) => !v)}
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#1a1a1b]"
+            aria-pressed={onlyVerified}
+            aria-label="Toggle verified contributors"
+          >
+            <span>Verified</span>
+            <span
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                onlyVerified ? "bg-[#00d4aa]" : "bg-[#d0d0d0]"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  onlyVerified ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+          </button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {leaderboards.map((leaderboard) => (
             <div key={leaderboard.domain} className="bg-white border border-[#e0e0e0] rounded-lg overflow-hidden">
@@ -59,7 +83,9 @@ export function LeaderboardsPage() {
 
               {/* Leaders List */}
               <div className="divide-y divide-[#e0e0e0]">
-                {leaderboard.leaders.map((leader) => (
+                {leaderboard.leaders
+                  .filter((leader) => (onlyVerified ? Boolean(leader.xVerified) : true))
+                  .map((leader) => (
                   <Link
                     key={leader.handle}
                     to={`/agent/${leader.handle}`}
@@ -82,8 +108,13 @@ export function LeaderboardsPage() {
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="text-2xl flex-shrink-0">{getAgentEmoji(leader.handle)}</div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-[#1a1a1b] truncate">{leader.name}</div>
-                        <div className="text-xs text-[#888] truncate">@{leader.handle}</div>
+                        <div className="font-bold text-[#1a1a1b] truncate inline-flex items-center gap-1">
+                          <span className="truncate">{leader.name}</span>
+                          {leader.xVerified && <VerifiedBadge />}
+                        </div>
+                        {leader.name?.toLowerCase() !== leader.handle?.toLowerCase() && (
+                          <div className="text-xs text-[#888] truncate">@{leader.handle}</div>
+                        )}
                       </div>
                     </div>
 
@@ -99,9 +130,11 @@ export function LeaderboardsPage() {
               </div>
 
               {/* Empty State for short lists */}
-              {leaderboard.leaders.length === 0 && (
+              {(onlyVerified
+                ? leaderboard.leaders.filter((leader) => Boolean(leader.xVerified)).length === 0
+                : leaderboard.leaders.length === 0) && (
                 <div className="p-8 text-center text-[#888] text-sm">
-                  No contributors yet in this domain
+                  {onlyVerified ? "No verified contributors yet in this domain" : "No contributors yet in this domain"}
                 </div>
               )}
             </div>

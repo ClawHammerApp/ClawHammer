@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { api } from "../../convex/_generated/api";
 import { getAgentEmoji } from "../lib/agentEmoji";
 import { ProgressGraph } from "../components/ProgressGraph";
+import { VerifiedBadge } from "../components/VerifiedBadge";
 
 export function AgentProfilePage() {
   const { handle } = useParams<{ handle: string }>();
@@ -35,7 +36,7 @@ export function AgentProfilePage() {
     );
   }
 
-  const { agent, goals, evaluations, strategies } = profile;
+  const { agent, goals, evaluations, strategies, stakes = [], stakeStats } = profile as any;
 
   return (
     <div className="flex-1 bg-[#fafafa]">
@@ -50,8 +51,20 @@ export function AgentProfilePage() {
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white">{agent.name}</h1>
-            <p className="text-[#888] text-sm">@{agent.handle}</p>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              {agent.name}
+              {agent.xVerified && <VerifiedBadge />}
+            </h1>
+            {agent.xVerified && agent.xHandle && (
+              <a
+                href={`https://x.com/${agent.xHandle.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#1d9bf0] text-sm hover:underline mt-1"
+              >
+                @{agent.xHandle.replace(/^@/, "")}
+              </a>
+            )}
             {agent.description && (
               <p className="text-[#cfcfcf] text-sm mt-2 max-w-lg">{agent.description}</p>
             )}
@@ -83,6 +96,10 @@ export function AgentProfilePage() {
               <div className="text-2xl font-bold text-[#4a9eff]">{evaluations.length}</div>
               <div className="text-xs text-[#888]">Evaluations</div>
             </div>
+            <div>
+              <div className="text-2xl font-bold text-[#00a884]">{stakes.length}</div>
+              <div className="text-xs text-[#888]">Staking</div>
+            </div>
           </div>
         </div>
       </div>
@@ -92,6 +109,56 @@ export function AgentProfilePage() {
         {evaluations.length > 0 && (
           <ProgressGraph evaluations={evaluations} goals={goals} />
         )}
+
+        {/* Stakes */}
+        <section>
+          <h2 className="text-xl font-bold text-[#1a1a1b] mb-4 flex items-center gap-2">
+            🪙 Staking <span className="text-sm font-normal text-[#888]">({stakes.length})</span>
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div className="bg-white border border-[#e0e0e0] rounded-lg p-4">
+              <div className="text-xs text-[#888]">$CLAWHAMMER Staked</div>
+              <div className="text-lg font-bold text-[#e01b24]">{Number(stakeStats?.currentStakeAmount ?? 0).toLocaleString()}</div>
+            </div>
+            <div className="bg-white border border-[#e0e0e0] rounded-lg p-4">
+              <div className="text-xs text-[#888]">SOL Accrued</div>
+              <div className="text-lg font-bold text-[#00a884]">{Number(stakeStats?.currentAccruedRewardSol ?? 0).toFixed(6)}</div>
+            </div>
+            <div className="bg-white border border-[#e0e0e0] rounded-lg p-4">
+              <div className="text-xs text-[#888]">Lifetime Staked</div>
+              <div className="text-lg font-bold text-[#1a1a1b]">{Number(stakeStats?.lifetimeStakeAmount ?? 0).toLocaleString()}</div>
+            </div>
+            <div className="bg-white border border-[#e0e0e0] rounded-lg p-4">
+              <div className="text-xs text-[#888]">Lifetime SOL Payouts</div>
+              <div className="text-lg font-bold text-[#1a1a1b]">{Number(stakeStats?.lifetimeRewardPaidSol ?? 0).toFixed(6)}</div>
+            </div>
+          </div>
+
+          {stakes.length === 0 ? (
+            <div className="bg-white border border-[#e0e0e0] rounded-lg p-6 text-center text-[#888]">
+              No stakes yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stakes.map((s: any) => (
+                <div key={s._id} className="bg-white border border-[#e0e0e0] rounded-lg p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-[#888]">{s.stakeId}</div>
+                      <h3 className="font-bold text-[#1a1a1b]">{Number(s.stakeAmount ?? 0).toLocaleString()} {s.tokenSymbol ?? "$CLAWHAMMER"}</h3>
+                      <p className="text-sm text-[#555]">Status: {s.status}</p>
+                    </div>
+                    <div className="text-right text-xs text-[#888]">
+                      <div>Accrued: {Number(s.accruedRewardSol ?? 0).toFixed(6)} SOL</div>
+                      <div>{new Date(s.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Goals */}
         <section>

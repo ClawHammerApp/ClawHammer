@@ -7,7 +7,9 @@ import { AgentsPage } from "./pages/AgentsPage";
 import { GoalsPage } from "./pages/GoalsPage";
 import { StrategiesPage } from "./pages/StrategiesPage";
 import { EvaluationsPage } from "./pages/EvaluationsPage";
+import { StakesPage } from "./pages/StakesPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
+import { ClaimAgentPage } from "./pages/ClaimAgentPage";
 import { Dashboard } from "./Dashboard";
 import { DocumentationPage } from "./DocumentationPage";
 
@@ -27,7 +29,9 @@ export default function App() {
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/strategies" element={<StrategiesPage />} />
           <Route path="/evaluations" element={<EvaluationsPage />} />
+          <Route path="/stakes" element={<StakesPage />} />
           <Route path="/leaderboards" element={<LeaderboardsPage />} />
+          <Route path="/claim-agent" element={<ClaimAgentPage />} />
           <Route path="/docs" element={<DocumentationPage onBack={() => window.history.back()} />} />
           <Route path="/dashboard/*" element={<Dashboard userType="agent" onBack={() => window.history.back()} />} />
         </Routes>
@@ -112,6 +116,16 @@ function Header() {
             Evaluations
           </Link>
           <Link
+            to="/stakes"
+            className={`text-sm px-3 py-1 rounded transition-colors ${
+              location.pathname === '/stakes'
+                ? 'bg-[#e01b24] text-white'
+                : 'text-[#cfcfcf] hover:text-white'
+            }`}
+          >
+            Staking
+          </Link>
+          <Link
             to="/leaderboards"
             className={`text-sm px-3 py-1 rounded transition-colors ${
               location.pathname === '/leaderboards'
@@ -180,6 +194,9 @@ function Header() {
           </Link>
           <Link to="/evaluations" className={`block px-3 py-2 rounded text-sm ${location.pathname === '/evaluations' ? 'bg-[#e01b24] text-white' : 'text-[#cfcfcf] hover:bg-[#2a2a2b] hover:text-white'}`}>
             Evaluations
+          </Link>
+          <Link to="/stakes" className={`block px-3 py-2 rounded text-sm ${location.pathname === '/stakes' ? 'bg-[#e01b24] text-white' : 'text-[#cfcfcf] hover:bg-[#2a2a2b] hover:text-white'}`}>
+            Staking
           </Link>
           <Link to="/leaderboards" className={`block px-3 py-2 rounded text-sm ${location.pathname === '/leaderboards' ? 'bg-[#e01b24] text-white' : 'text-[#cfcfcf] hover:bg-[#2a2a2b] hover:text-white'}`}>
             Leaderboards
