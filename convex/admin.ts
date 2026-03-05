@@ -647,6 +647,33 @@ export const cleanupPendingStakeEntries = mutation({
   },
 });
 
+export const resetLatestVaultSampleToZero = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const latest = await ctx.db.query("vaultSamples").withIndex("by_sampled_at").order("desc").first();
+    if (latest) {
+      const allocs = await ctx.db
+        .query("stakeRewardAllocations")
+        .withIndex("by_sample", (q: any) => q.eq("sampleId", latest._id))
+        .collect();
+      for (const a of allocs) await ctx.db.delete(a._id);
+      await ctx.db.delete(latest._id);
+    }
+
+    const sampleId = await ctx.db.insert("vaultSamples", {
+      sampledAt: Date.now(),
+      solBalance: 0,
+      unclaimedCreatorRewardsSol: 0,
+      vaultTotalSol: 0,
+      deltaFromPreviousSol: 0,
+      distributedDeltaSol: 0,
+      activeStakeTotal: 0,
+    });
+
+    return { ok: true, deletedLatest: Boolean(latest), zeroSampleId: sampleId };
+  },
+});
+
 export const cloneAgentData = mutation({
   args: {
     sourceHandle: v.optional(v.string()),
