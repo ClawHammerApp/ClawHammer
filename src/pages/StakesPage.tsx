@@ -54,7 +54,6 @@ export function StakesPage() {
             <div key={s._id} className="bg-white border border-[#e0e0e0] rounded-lg p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="text-sm text-[#888]">{s.stakeId}</div>
                   <button
                     onClick={() => s.agent?.handle && navigate(`/agent/${s.agent.handle}`)}
                     className="font-bold text-[#1a1a1b] hover:text-[#00d4aa] inline-flex items-center gap-1"

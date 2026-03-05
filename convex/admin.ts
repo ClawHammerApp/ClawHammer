@@ -560,6 +560,93 @@ export const cleanupTempClawhammerStakePreviews = mutation({
   },
 });
 
+export const cleanupPendingStakeEntries = mutation({
+  args: {
+    handle: v.optional(v.string()),
+    stakeId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const handle = args.handle ?? "clawhammer";
+
+    let stakes = await ctx.db.query("stakes").collect();
+
+    if (args.stakeId) {
+      stakes = stakes.filter((s: any) => s.stakeId === args.stakeId);
+    } else {
+      const agent = await ctx.db
+        .query("agents")
+        .withIndex("by_handle", (q: any) => q.eq("handle", handle))
+        .unique();
+      if (!agent) throw new Error(`Agent not found: ${handle}`);
+      stakes = stakes.filter((s: any) => s.agentId === agent._id && s.status === "pending_payment");
+    }
+
+    let deletedStakes = 0;
+    let deletedReceipts = 0;
+    let deletedPayoutRequests = 0;
+
+    for (const stake of stakes) {
+      const receipts = await ctx.db
+        .query("stakePaymentReceipts")
+        .withIndex("by_stake", (q: any) => q.eq("stakeId", stake._id))
+        .collect();
+      for (const r of receipts) {
+        await ctx.db.delete(r._id);
+        deletedReceipts++;
+      }
+
+      const payouts = await ctx.db
+        .query("payoutRequests")
+        .withIndex("by_stake", (q: any) => q.eq("stakeId", stake._id))
+        .collect();
+      for (const p of payouts) {
+        await ctx.db.delete(p._id);
+        deletedPayoutRequests++;
+      }
+
+      await ctx.db.delete(stake._id);
+      deletedStakes++;
+    }
+
+    // Recompute clawhammer stats safely from counted statuses only
+    const agent = await ctx.db
+      .query("agents")
+      .withIndex("by_handle", (q: any) => q.eq("handle", handle))
+      .unique();
+
+    if (agent) {
+      const all = await ctx.db
+        .query("stakes")
+        .withIndex("by_agent", (q: any) => q.eq("agentId", agent._id))
+        .collect();
+
+      const counted = all.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status));
+      const active = counted.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending"].includes(s.status));
+      const paid = counted.filter((s: any) => s.status === "paid_out");
+
+      const payload = {
+        agentId: agent._id,
+        currentStakeAmount: active.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0),
+        currentAccruedRewardSol: active.reduce((sum: number, s: any) => sum + (s.accruedRewardSol ?? 0), 0),
+        lifetimeStakeAmount: counted.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0),
+        lifetimeRewardPaidSol: paid.reduce((sum: number, s: any) => sum + (s.rewardPaidSol ?? 0), 0),
+        lifetimePrincipalReturned: paid.reduce((sum: number, s: any) => sum + (s.principalReturned ?? 0), 0),
+        activeStakeCount: active.length,
+        updatedAt: Date.now(),
+      };
+
+      const stat = await ctx.db
+        .query("agentStakeStats")
+        .withIndex("by_agent", (q: any) => q.eq("agentId", agent._id))
+        .unique();
+      if (stat) await ctx.db.patch(stat._id, payload);
+      else await ctx.db.insert("agentStakeStats", payload);
+    }
+
+    return { ok: true, deletedStakes, deletedReceipts, deletedPayoutRequests };
+  },
+});
+
 export const cloneAgentData = mutation({
   args: {
     sourceHandle: v.optional(v.string()),

@@ -212,6 +212,8 @@ curl -X POST https://perfect-meadowlark-330.convex.site/api/stakes/lock \
 
 If valid, stake is finalized and enters `Vesting`.
 
+Pending challenges are not counted in staking totals or shown as active staking positions until payment is verified.
+
 ### View Staking Status
 ```bash
 curl https://perfect-meadowlark-330.convex.site/api/stakes/list \

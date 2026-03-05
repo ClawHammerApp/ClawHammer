@@ -70,12 +70,13 @@ async function recomputeAgentStakeStats(ctx: any, agentId: Id<"agents">) {
     .withIndex("by_agent", (q: any) => q.eq("agentId", agentId))
     .collect();
 
-  const active = all.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending"].includes(s.status));
-  const paid = all.filter((s: any) => s.status === "paid_out");
+  const counted = all.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status));
+  const active = counted.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending"].includes(s.status));
+  const paid = counted.filter((s: any) => s.status === "paid_out");
 
   const currentStakeAmount = active.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0);
   const currentAccruedRewardSol = active.reduce((sum: number, s: any) => sum + (s.accruedRewardSol ?? 0), 0);
-  const lifetimeStakeAmount = all.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0);
+  const lifetimeStakeAmount = counted.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0);
   const lifetimeRewardPaidSol = paid.reduce((sum: number, s: any) => sum + (s.rewardPaidSol ?? 0), 0);
   const lifetimePrincipalReturned = paid.reduce((sum: number, s: any) => sum + (s.principalReturned ?? 0), 0);
   const activeStakeCount = active.length;
@@ -397,8 +398,10 @@ export const getHomepageMetrics = query({
       ctx.db.query("stakes").collect(),
     ]);
 
-    const lifetimeClawhammerStaked = stakes.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0);
-    const lifetimeRewardsAccruedSol = stakes.reduce(
+    const countedStakes = stakes.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status));
+
+    const lifetimeClawhammerStaked = countedStakes.reduce((sum: number, s: any) => sum + (s.stakeAmount ?? 0), 0);
+    const lifetimeRewardsAccruedSol = countedStakes.reduce(
       (sum: number, s: any) => sum + (s.lifetimeAccruedRewardSol ?? s.accruedRewardSol ?? 0),
       0
     );
@@ -437,6 +440,7 @@ export const listRecentTickerItems = query({
 
     // Collect all agent IDs and resolve handles
     const recentStakes = [...stakes]
+      .filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status))
       .sort((a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
       .slice(0, limit);
 
@@ -484,7 +488,7 @@ export const listRecentTickerItems = query({
       ...recentStakes.map((s: any) => ({
         type: "stake" as const,
         createdAt: s.createdAt,
-        headline: `staked ${s.stakeAmount} ${s.tokenSymbol ?? "$CLAWHAMMER"}`,
+        headline: `Staked ${s.stakeAmount} ${s.tokenSymbol ?? "$CLAWHAMMER"}`,
         agentHandle: agentMap[s.agentId]?.handle ?? null,
         agentName: agentMap[s.agentId]?.name ?? null,
         agentVerified: agentMap[s.agentId]?.xVerified ?? false,
@@ -535,7 +539,10 @@ export const listAllStakes = query({
   handler: async (ctx, args) => {
     const limit = clamp(args.limit ?? 50, 1, 200);
     const stakes = await ctx.db.query("stakes").collect();
-    const sorted = [...stakes].sort((a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0)).slice(0, limit);
+    const sorted = [...stakes]
+      .filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status))
+      .sort((a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+      .slice(0, limit);
 
     const agentIds = [...new Set(sorted.map((s: any) => s.agentId))];
     const goalIds = [...new Set(sorted.map((s: any) => s.goalId))];
@@ -627,7 +634,7 @@ export const getAgentProfile = query({
 
     if (!agent) return null;
 
-    const [goals, evaluations, strategies, stakes, stakeStats] = await Promise.all([
+    const [goals, evaluations, strategies, allStakes, stakeStats] = await Promise.all([
       ctx.db
         .query("goals")
         .withIndex("by_agent", (q: any) => q.eq("agentId", agent._id))
@@ -647,12 +654,16 @@ export const getAgentProfile = query({
         .query("stakes")
         .withIndex("by_agent", (q: any) => q.eq("agentId", agent._id))
         .order("desc")
-        .take(20),
+        .collect(),
       ctx.db
         .query("agentStakeStats")
         .withIndex("by_agent", (q: any) => q.eq("agentId", agent._id))
         .unique(),
     ]);
+
+    const stakes = allStakes
+      .filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status))
+      .slice(0, 20);
 
     return {
       agent: {
@@ -1110,11 +1121,12 @@ export const listStakesByAgent = query({
       .unique();
     if (!agent) throw new Error("Agent not found");
 
-    const [stakes, stats] = await Promise.all([
+    const [allStakes, stats] = await Promise.all([
       ctx.db.query("stakes").withIndex("by_agent", (q: any) => q.eq("agentId", agent._id)).order("desc").collect(),
       ctx.db.query("agentStakeStats").withIndex("by_agent", (q: any) => q.eq("agentId", agent._id)).unique(),
     ]);
 
+    const stakes = allStakes.filter((s: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(s.status));
     return { stakes, stats };
   },
 });
