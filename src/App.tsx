@@ -51,7 +51,7 @@ function Header() {
 
   return (
     <header className="bg-[#1a1a1b] border-b-4 border-[#e01b24] px-4 py-3 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto grid grid-cols-3 items-center gap-4 relative">
+      <div className="max-w-6xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-4 relative">
         {/* Left: Logo */}
         <div className="flex items-center justify-start">
           <Link to="/" className="flex items-center gap-3 group">

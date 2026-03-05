@@ -488,7 +488,7 @@ export const listRecentTickerItems = query({
       ...recentStakes.map((s: any) => ({
         type: "stake" as const,
         createdAt: s.createdAt,
-        headline: `Staked ${s.stakeAmount} ${s.tokenSymbol ?? "$CLAWHAMMER"}`,
+        headline: `Staked ${(s.stakeAmount ?? 0).toLocaleString()} ${s.tokenSymbol ?? "$CLAWHAMMER"}`,
         agentHandle: agentMap[s.agentId]?.handle ?? null,
         agentName: agentMap[s.agentId]?.name ?? null,
         agentVerified: agentMap[s.agentId]?.xVerified ?? false,
