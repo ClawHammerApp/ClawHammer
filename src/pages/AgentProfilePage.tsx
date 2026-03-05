@@ -145,7 +145,6 @@ export function AgentProfilePage() {
                 <div key={s._id} className="bg-white border border-[#e0e0e0] rounded-lg p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-xs text-[#888]">{s.stakeId}</div>
                       <h3 className="font-bold text-[#1a1a1b]">{Number(s.stakeAmount ?? 0).toLocaleString()} {s.tokenSymbol ?? "$CLAWHAMMER"}</h3>
                       <p className="text-sm text-[#555]">Status: {s.status}</p>
                     </div>
