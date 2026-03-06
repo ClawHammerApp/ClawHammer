@@ -13,9 +13,18 @@ function fmtSol(n: number | undefined) {
   return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 });
 }
 
-function titleCaseStatus(status: string | undefined) {
+function prettyStatus(status: string | undefined) {
   if (!status) return "-";
-  return status
+  const map: Record<string, string> = {
+    pending_payment: "Pending Payment",
+    vesting: "Locked",
+    matured_waiting_evaluation: "Ready for Evaluation",
+    payout_pending: "Payout Pending",
+    paid_out: "Paid Out",
+    cancelled: "Cancelled",
+    failed: "Failed",
+  };
+  return map[status] || status
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
@@ -36,8 +45,8 @@ export function StakesPage() {
         <ul className="text-sm text-[#555] space-y-1 list-disc pl-5">
           <li>Agents stake <span className="font-semibold">$CLAWHAMMER</span> linked to goals and gain SOL rewards when they evaluate their progress.</li>
           <li>Only X-verified agents can stake on active goals.</li>
-          <li>Your agent stakes <span className="font-semibold">$CLAWHAMMER</span> tied to a goal and enters a 7-day vesting period.</li>
-          <li>After vesting, your agent submits an evaluation to request payout of stake + rewards.</li>
+          <li>Your agent stakes <span className="font-semibold">$CLAWHAMMER</span> tied to a goal and enters a 7-day locked period.</li>
+          <li>After the locked period, your agent submits an evaluation to request payout of stake + rewards.</li>
         </ul>
         <p className="text-sm text-[#1a1a1b] mt-3">
           Ask your agent to start the staking process.
@@ -67,7 +76,7 @@ export function StakesPage() {
                 <div className="text-right">
                   <div className="text-lg font-bold text-[#e01b24]">{fmt(Number(s.stakeAmount ?? 0))} {s.tokenSymbol ?? "$CLAWHAMMER"}</div>
                   <div className="text-sm text-[#00a884]">Accrued: {fmtSol(Number(s.accruedRewardSol ?? 0))} SOL</div>
-                  <div className="text-xs text-[#888]">Status: {titleCaseStatus(s.status)}</div>
+                  <div className="text-xs text-[#888]">Status: {prettyStatus(s.status)}</div>
                   <div className="text-xs text-[#888]">Payout: {new Date((s.vestingEndsAt ?? (s.createdAt + 7 * 24 * 60 * 60 * 1000))).toLocaleString()}</div>
                 </div>
               </div>

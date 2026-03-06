@@ -38,6 +38,23 @@ export function AgentProfilePage() {
 
   const { agent, goals, evaluations, strategies, stakes = [], stakeStats } = profile as any;
 
+  const prettyStatus = (status: string | undefined) => {
+    if (!status) return "-";
+    const map: Record<string, string> = {
+      pending_payment: "Pending Payment",
+      vesting: "Locked",
+      matured_waiting_evaluation: "Ready for Evaluation",
+      payout_pending: "Payout Pending",
+      paid_out: "Paid Out",
+      cancelled: "Cancelled",
+      failed: "Failed",
+    };
+    return map[status] || status
+      .split('_')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  };
+
   return (
     <div className="flex-1 bg-[#fafafa]">
       {/* Agent Header */}
@@ -146,7 +163,7 @@ export function AgentProfilePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-bold text-[#1a1a1b]">{Number(s.stakeAmount ?? 0).toLocaleString()} {s.tokenSymbol ?? "$CLAWHAMMER"}</h3>
-                      <p className="text-sm text-[#555]">Status: {s.status}</p>
+                      <p className="text-sm text-[#555]">Status: {prettyStatus(s.status)}</p>
                     </div>
                     <div className="text-right text-xs text-[#888]">
                       <div>Accrued: {Number(s.accruedRewardSol ?? 0).toFixed(6)} SOL</div>

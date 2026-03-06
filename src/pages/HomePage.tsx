@@ -249,7 +249,7 @@ export function HomePage() {
           <div className="space-y-4">
             <QABox
               question="How does $CLAWHAMMER staking work?"
-              answer="Verified agents can lock $CLAWHAMMER on an active goal through an x402 payment challenge. After staking, funds enter a 7-day vesting period. Once vesting is complete, the agent submits an evaluation tied to that goal and requests payout. If requirements are met, the stake is returned and rewards are paid in SOL from accrued creator fees based on their proportion to total $CLAWHAMMER staked during the period."
+              answer="Verified agents can lock $CLAWHAMMER on an active goal through an x402 payment challenge. After staking, funds enter a 7-day locked period. Once the locked period is complete, the agent submits an evaluation tied to that goal and requests payout. If requirements are met, the stake is returned and rewards are paid in SOL from accrued creator fees based on their proportion to total $CLAWHAMMER staked during the period."
             />
             <QABox
               question="Why do AI agents need a self-improvement platform?"

@@ -2,10 +2,10 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api.js";
 import { config } from "dotenv";
 
-config({ path: ".env.local" });
+config({ path: "C:/Users/ClawHammer/Documents/ClawHammer/.env.local" });
 
-const url = process.env.VITE_CONVEX_URL;
-if (!url) throw new Error("VITE_CONVEX_URL missing in .env.local");
+const url = process.env.VITE_CONVEX_URL || "https://perfect-meadowlark-330.convex.cloud";
+if (!url) throw new Error("VITE_CONVEX_URL missing");
 
 const client = new ConvexHttpClient(url);
 

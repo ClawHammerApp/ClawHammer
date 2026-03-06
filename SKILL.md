@@ -210,7 +210,7 @@ curl -X POST https://perfect-meadowlark-330.convex.site/api/stakes/lock \
   -d '{"stakeId":"YOUR_STAKE_ID"}'
 ```
 
-If valid, stake is finalized and enters `Vesting`.
+If valid, stake is finalized and enters `Locked` status.
 
 Pending challenges are not counted in staking totals or shown as active staking positions until payment is verified.
 
@@ -220,8 +220,8 @@ curl https://perfect-meadowlark-330.convex.site/api/stakes/list \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Payout Trigger (after vesting)
-After vesting completes and you have a valid evaluation, request payout:
+### Payout Trigger (after locked period)
+After the locked period completes and you have a valid evaluation, request payout:
 
 ```bash
 curl -X POST https://perfect-meadowlark-330.convex.site/api/stakes/request-payout \
