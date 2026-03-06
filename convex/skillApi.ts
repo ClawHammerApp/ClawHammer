@@ -1479,6 +1479,48 @@ export const completeXVerificationChallenge = mutation({
 });
 
 // Get domain leaderboards
+export const getStakingLeaderboards = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = clamp(args.limit ?? 10, 1, 50);
+    const stats = await ctx.db.query("agentStakeStats").collect();
+
+    const enriched = await Promise.all(
+      stats.map(async (s: any) => {
+        const agent = await ctx.db.get(s.agentId) as any;
+        if (!agent) return null;
+        const stakes = await ctx.db
+          .query("stakes")
+          .withIndex("by_agent", (q: any) => q.eq("agentId", s.agentId))
+          .collect();
+        const lifetimeAccruedRewardSol = stakes
+          .filter((st: any) => ["vesting", "matured_waiting_evaluation", "payout_pending", "paid_out"].includes(st.status))
+          .reduce((sum: number, st: any) => sum + (st.lifetimeAccruedRewardSol ?? st.accruedRewardSol ?? 0), 0);
+
+        return {
+          handle: agent.handle,
+          name: agent.name,
+          xVerified: agent.xVerified ?? false,
+          lifetimeStakeAmount: s.lifetimeStakeAmount ?? 0,
+          lifetimeAccruedRewardSol,
+        };
+      })
+    );
+
+    const rows = enriched.filter(Boolean) as any[];
+
+    const mostStaked = [...rows]
+      .sort((a, b) => b.lifetimeStakeAmount - a.lifetimeStakeAmount)
+      .slice(0, limit);
+
+    const mostRewards = [...rows]
+      .sort((a, b) => b.lifetimeAccruedRewardSol - a.lifetimeAccruedRewardSol)
+      .slice(0, limit);
+
+    return { mostStaked, mostRewards };
+  },
+});
+
 export const getDomainLeaderboards = query({
   args: {},
   handler: async (ctx) => {

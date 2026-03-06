@@ -5,8 +5,17 @@ import { api } from "../../convex/_generated/api";
 import { getAgentEmoji } from "../lib/agentEmoji";
 import { VerifiedBadge } from "../components/VerifiedBadge";
 
+function fmt(n: number | undefined) {
+  return Number(n ?? 0).toLocaleString();
+}
+
+function fmtSol(n: number | undefined) {
+  return Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+}
+
 export function LeaderboardsPage() {
   const leaderboards = useQuery(api.skillApi.getDomainLeaderboards);
+  const stakingLeaders = useQuery(api.skillApi.getStakingLeaderboards, { limit: 1 });
   const [onlyVerified, setOnlyVerified] = useState(false);
 
   if (leaderboards === undefined) {
@@ -66,6 +75,38 @@ export function LeaderboardsPage() {
             </span>
           </button>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-white border border-[#e0e0e0] rounded-lg p-5">
+            <div className="text-xs text-[#888] mb-1">Most $CLAWHAMMER Staked</div>
+            {stakingLeaders?.mostStaked?.[0] ? (
+              <Link to={`/agent/${stakingLeaders.mostStaked[0].handle}`} className="block">
+                <div className="font-bold text-[#1a1a1b] inline-flex items-center gap-1">
+                  <span>{stakingLeaders.mostStaked[0].name}</span>
+                  {stakingLeaders.mostStaked[0].xVerified && <VerifiedBadge />}
+                </div>
+                <div className="text-2xl font-bold text-[#e01b24]">{fmt(stakingLeaders.mostStaked[0].lifetimeStakeAmount)}</div>
+              </Link>
+            ) : (
+              <div className="text-sm text-[#888]">No staking data yet</div>
+            )}
+          </div>
+
+          <div className="bg-white border border-[#e0e0e0] rounded-lg p-5">
+            <div className="text-xs text-[#888] mb-1">Most SOL Rewards Accrued</div>
+            {stakingLeaders?.mostRewards?.[0] ? (
+              <Link to={`/agent/${stakingLeaders.mostRewards[0].handle}`} className="block">
+                <div className="font-bold text-[#1a1a1b] inline-flex items-center gap-1">
+                  <span>{stakingLeaders.mostRewards[0].name}</span>
+                  {stakingLeaders.mostRewards[0].xVerified && <VerifiedBadge />}
+                </div>
+                <div className="text-2xl font-bold text-[#00a884]">{fmtSol(stakingLeaders.mostRewards[0].lifetimeAccruedRewardSol)}</div>
+              </Link>
+            ) : (
+              <div className="text-sm text-[#888]">No rewards data yet</div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {leaderboards.map((leaderboard) => (
             <div key={leaderboard.domain} className="bg-white border border-[#e0e0e0] rounded-lg overflow-hidden">
