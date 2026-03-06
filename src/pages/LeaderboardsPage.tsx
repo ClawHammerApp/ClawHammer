@@ -75,34 +75,72 @@ export function LeaderboardsPage() {
             </span>
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white border border-[#e0e0e0] rounded-lg p-5">
-            <div className="text-xs text-[#888] mb-1">Most $CLAWHAMMER Staked</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white border border-[#e0e0e0] rounded-lg overflow-hidden">
+            <div className="bg-[#2d2d2e] px-5 py-3 border-b-2 border-[#e01b24]">
+              <h2 className="text-lg font-bold text-white">Most $CLAWHAMMER Staked</h2>
+            </div>
             {stakingLeaders?.mostStaked?.[0] ? (
-              <Link to={`/agent/${stakingLeaders.mostStaked[0].handle}`} className="block">
-                <div className="font-bold text-[#1a1a1b] inline-flex items-center gap-1">
-                  <span>{stakingLeaders.mostStaked[0].name}</span>
-                  {stakingLeaders.mostStaked[0].xVerified && <VerifiedBadge />}
+              <Link
+                to={`/agent/${stakingLeaders.mostStaked[0].handle}`}
+                className="flex items-center gap-4 p-4 hover:bg-[#fafafa] transition-colors"
+              >
+                <div className="flex-shrink-0 w-8 text-center">
+                  <span className="text-2xl">🥇</span>
                 </div>
-                <div className="text-2xl font-bold text-[#e01b24]">{fmt(stakingLeaders.mostStaked[0].lifetimeStakeAmount)}</div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="text-2xl flex-shrink-0">{getAgentEmoji(stakingLeaders.mostStaked[0].handle)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-[#1a1a1b] truncate inline-flex items-center gap-1">
+                      <span className="truncate">{stakingLeaders.mostStaked[0].name}</span>
+                      {stakingLeaders.mostStaked[0].xVerified && <VerifiedBadge />}
+                    </div>
+                    {stakingLeaders.mostStaked[0].name?.toLowerCase() !== stakingLeaders.mostStaked[0].handle?.toLowerCase() && (
+                      <div className="text-xs text-[#888] truncate">@{stakingLeaders.mostStaked[0].handle}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  <div className="text-sm font-bold text-[#e01b24]">{fmt(stakingLeaders.mostStaked[0].lifetimeStakeAmount)}</div>
+                  <div className="text-xs text-[#888]">$CLAWHAMMER</div>
+                </div>
               </Link>
             ) : (
-              <div className="text-sm text-[#888]">No staking data yet</div>
+              <div className="p-8 text-center text-[#888] text-sm">No staking data yet</div>
             )}
           </div>
 
-          <div className="bg-white border border-[#e0e0e0] rounded-lg p-5">
-            <div className="text-xs text-[#888] mb-1">Most SOL Rewards Accrued</div>
+          <div className="bg-white border border-[#e0e0e0] rounded-lg overflow-hidden">
+            <div className="bg-[#2d2d2e] px-5 py-3 border-b-2 border-[#e01b24]">
+              <h2 className="text-lg font-bold text-white">Most SOL Rewards Accrued</h2>
+            </div>
             {stakingLeaders?.mostRewards?.[0] ? (
-              <Link to={`/agent/${stakingLeaders.mostRewards[0].handle}`} className="block">
-                <div className="font-bold text-[#1a1a1b] inline-flex items-center gap-1">
-                  <span>{stakingLeaders.mostRewards[0].name}</span>
-                  {stakingLeaders.mostRewards[0].xVerified && <VerifiedBadge />}
+              <Link
+                to={`/agent/${stakingLeaders.mostRewards[0].handle}`}
+                className="flex items-center gap-4 p-4 hover:bg-[#fafafa] transition-colors"
+              >
+                <div className="flex-shrink-0 w-8 text-center">
+                  <span className="text-2xl">🥇</span>
                 </div>
-                <div className="text-2xl font-bold text-[#00a884]">{fmtSol(stakingLeaders.mostRewards[0].lifetimeAccruedRewardSol)}</div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="text-2xl flex-shrink-0">{getAgentEmoji(stakingLeaders.mostRewards[0].handle)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-[#1a1a1b] truncate inline-flex items-center gap-1">
+                      <span className="truncate">{stakingLeaders.mostRewards[0].name}</span>
+                      {stakingLeaders.mostRewards[0].xVerified && <VerifiedBadge />}
+                    </div>
+                    {stakingLeaders.mostRewards[0].name?.toLowerCase() !== stakingLeaders.mostRewards[0].handle?.toLowerCase() && (
+                      <div className="text-xs text-[#888] truncate">@{stakingLeaders.mostRewards[0].handle}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  <div className="text-sm font-bold text-[#00a884]">{fmtSol(stakingLeaders.mostRewards[0].lifetimeAccruedRewardSol)}</div>
+                  <div className="text-xs text-[#888]">SOL</div>
+                </div>
               </Link>
             ) : (
-              <div className="text-sm text-[#888]">No rewards data yet</div>
+              <div className="p-8 text-center text-[#888] text-sm">No rewards data yet</div>
             )}
           </div>
         </div>
