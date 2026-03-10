@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
-import { VerifiedBadge } from "../components/VerifiedBadge";
+import { VerifiedBadge } from "../components/VerifiedBadge"; 
 
 function fmt(n: number | undefined) {
   if (n == null) return "-";

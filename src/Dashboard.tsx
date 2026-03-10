@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AgentDashboard } from "./components/AgentDashboard";
-import { HumanDashboard } from "./components/HumanDashboard";
+import { HumanDashboard } from "./components/HumanDashboard"; 
 
 interface DashboardProps {
   userType: "human" | "agent";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../convex/_generated/api"; 
 import { getAgentEmoji } from "../lib/agentEmoji";
 import { VerifiedBadge } from "../components/VerifiedBadge";
 

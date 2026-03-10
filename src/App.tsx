@@ -11,7 +11,7 @@ import { StakesPage } from "./pages/StakesPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 import { ClaimAgentPage } from "./pages/ClaimAgentPage";
 import { Dashboard } from "./Dashboard";
-import { DocumentationPage } from "./DocumentationPage";
+import { DocumentationPage } from "./DocumentationPage"; 
 
 export default function App() {
   useEffect(() => {
